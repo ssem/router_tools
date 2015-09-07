@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+import argparse
+import binascii
+
+
+class BinDiff():
+    def __init__(self, file1, file2, minlen, maxlen):
+        self.file1 = open(file1, 'rb').read()
+        self.file2 = open(file2, 'rb').read()
+        self.minlen = minlen
+        self.maxlen = maxlen
+
+    def run(self, print_hex, print_ascii):
+        if print_hex:
+            print 'file1 offsets              file2 offsets       hex'
+        elif print_ascii:
+            print 'file1 offsets              file2 offsets       ascii'
+        else:
+            print 'file1 offsets              file2 offsets'
+        for match in self._find_matches():
+            file1_offset, file2_offset, length, match = self._find_full_match_and_remove(match)
+            if print_hex:
+                print '{:<10}{:<10} -     {:<10}{:<10}{:10}'.format(
+                file1_offset, file1_offset+length, file2_offset, file2_offset+length, binascii.b2a_hex(match))
+            elif print_ascii:
+                print '{:<10}{:<10} -     {:<10}{:<10}{:10}'.format(
+                file1_offset, file1_offset+length, file2_offset, file2_offset+length, binascii.b2a_uu(match))
+            else:
+                print '{:<10}{:<10} -     {:<10}{:<10}'.format(
+                file1_offset, file1_offset+length, file2_offset, file2_offset+length)
+
+    def _find_full_match_and_remove(self, match):
+        counter = -1
+        file1_offset = self.file1.find(match)
+        file2_offset = self.file2.find(match)
+        while True:
+            counter += 1
+            try:
+                file1_char = self.file1[file1_offset + counter]
+                file2_char = self.file2[file2_offset + counter]
+            except:break
+            if file1_char != file2_char:
+                break
+        match = self.file2[file2_offset: file2_offset + counter]
+        ### removes match ###
+        self.file2 = self.file2[:file2_offset] + self.file2[file2_offset+counter:]
+        return file1_offset, file2_offset, counter, match
+
+    def _find_matches(self):
+        for search_string in self._search_strings():
+            if search_string in self.file2:
+                yield search_string
+
+    def _search_strings(self):
+        for length in reversed(xrange(self.minlen, self.maxlen + 1)):
+            for offset in xrange(0, len(self.file1)):
+                search_string = self.file1[offset:offset+length]
+                if len(search_string) == length:
+                    yield search_string
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file1', help='compare file1 with file2')
+    parser.add_argument('file2', help='compare file1 with file2')
+    parser.add_argument('--min', default=5,
+        help='min hex length to match (DEFAULT: 5)')
+    parser.add_argument('--max', default=100,
+        help='max hex length to match (DEFAULT: 100')
+    parser.add_argument('--print_hex', action='store_true', help='print match in ascii')
+    parser.add_argument('--print_ascii', action='store_true', help='print match in ascii')
+    args = parser.parse_args()
+    bindiff = BinDiff(args.file1, args.file2, int(args.min), int(args.max))
+    bindiff.run(args.print_hex, args.print_ascii)

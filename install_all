@@ -1,0 +1,75 @@
+#!/bin/bash
+HOME=`pwd`
+
+# baudrate
+cd $HOME
+cd baudrate
+sudo python setup.py install
+
+# bindiff
+cd $HOME
+cd bindiff
+sudo cp bindiff /usr/local/sbin/
+
+# binwalk
+cd $HOME
+cd binwalk
+./install
+cd binwalk
+sudo python setup.py install
+
+# cd botox
+cd $HOME
+cd botox
+./install
+sudo cp -r botox /opt/botox
+
+# fuzz
+cd $HOME
+cd fuzz
+sudo cp fuzz_httpd /usr/local/sbin/
+sudo cp fuzz_webdir /usr/local/sbin/
+
+# ida_plugins
+cd $HOME
+cd ida_plugins
+./install
+sudo cp -r ida /opt/ida_plugins
+
+# libmpsse
+cd $HOME
+cd libmpsse
+sudo python setup.py install
+
+# nvram-faker
+cd $HOME
+cd nvram-faker
+./install
+sudo cp -r nvram-faker /opt/
+
+# sasquatch
+cd $HOME
+cd sasquatch
+./install
+cd sasquatch
+make
+sudo make install
+
+# tftpgui
+cd $HOME
+cd tftpgui
+./install
+sudo cp -r tftpgui /opt/
+
+echo -e "\n\nInstall Summary\n"
+echo -e "\tbindiff    \t\tinstalled /usr/local/sbin/"
+echo -e "\tfuzz_httpd \t\tinstalled /usr/local/sbin/"
+echo -e "\tfuzz_webdir\t\tinstalled /usr/local/sbin/"
+echo -e "\tsasquatch  \t\tinstalled /usr/local/bin/"
+echo -e "\tbaudrate   \t\tinstalled /usr/bin/"
+echo -e "\tbinwalk    \t\tinstalled /usr/bin/"
+echo -e "\tspiflash   \t\tinstalled /usr/bin/"
+echo -e "\ttftpgui    \t\tinstalled /opt/"
+echo -e "\tida_plugins\t\tinstalled /opt/"
+echo -e "\tnvram-faker\t\tinstalled /opt/"
+echo -e "\tbotox      \t\tinstalled /opt/\n"
